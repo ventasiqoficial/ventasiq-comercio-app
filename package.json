@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "mkdir -p public && (for f in logo.png logo-claro.png favicon.ico; do curl -fsSL --max-time 20 -o public/$f https://ventasiq.com/assets/$f || true; done) && vite build"
+    "build": "node scripts/iconos.mjs && (for f in logo.png logo-claro.png favicon.ico; do curl -fsSL --max-time 20 -o public/$f https://ventasiq.com/assets/$f || true; done) && vite build"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
