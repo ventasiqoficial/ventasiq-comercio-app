@@ -27,7 +27,7 @@ export default function Login() {
     <main>
       <img className="logo-login" src="/logo.png" alt="VentasIQ" />
       <h1 style={{ textAlign: 'center' }}>Comercio</h1>
-      <p className="mut">Ordená tu monotributo y tus compras sin pagar un contador por cada consulta.</p>
+      <p className="mut">Te ayudamos a autogestionarte como un buen comerciante: tu monotributo, tus compras y tus ventas, siempre ordenados.</p>
       <div className="card">
         <button type="button" className="sec" style={{ width: '100%', marginTop: 0 }} onClick={conGoogle} disabled={ocupado}>Ingresar con Google</button>
         <p className="mut" style={{ textAlign: 'center', margin: '.6rem 0 0' }}>o con tu email</p>
