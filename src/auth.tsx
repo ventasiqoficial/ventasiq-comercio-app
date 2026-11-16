@@ -3,7 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase';
 import { esErrorDeRed } from './lib/offline';
 
-export type Comercio = { id: string; nombre: string; cuit: string | null; categoria_actual: string | null; tipo_actividad: string | null;
+export type Comercio = { id: string; nombre: string; cuit: string | null; provincia: string | null; categoria_actual: string | null; tipo_actividad: string | null;
   superficie_m2: number | null; energia_kw_anual: number | null; alquiler_anual: number | null; estado_suscripcion: string | null; prueba_hasta: string | null; fecha_proximo_cobro: string | null };
 export type Rol = 'dueno' | 'empleado';
 type Ctx = { session: Session | null; comercio: Comercio | null; rol: Rol; cargando: boolean; recargar: () => Promise<void> };
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const cargarComercio = async (s: Session | null) => {
     if (!s) { setComercio(null); return; }
     const pedir = () => supabase.from('comercios')
-      .select('id,nombre,cuit,categoria_actual,tipo_actividad,superficie_m2,energia_kw_anual,alquiler_anual,estado_suscripcion,prueba_hasta,fecha_proximo_cobro').maybeSingle();
+      .select('id,nombre,cuit,provincia,categoria_actual,tipo_actividad,superficie_m2,energia_kw_anual,alquiler_anual,estado_suscripcion,prueba_hasta,fecha_proximo_cobro').maybeSingle();
     let { data, error } = await pedir();
     // Sin internet: se usa la última copia guardada para poder seguir vendiendo
     if (error && (esErrorDeRed(error.message) || !navigator.onLine)) {

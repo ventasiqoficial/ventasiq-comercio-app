@@ -10,11 +10,17 @@ export default function Inicio() {
   const [u, setU] = useState<Umbral[]>([]);
   const [err, setErr] = useState('');
   const [pend, setPend] = useState(0);
+  const [iibb, setIibb] = useState<{ categoria: number; tope_ingresos_anuales: number; impuesto_mensual: number; excede_regimen: boolean } | null>(null);
 
   useEffect(() => {
     (async () => {
       const [a, b] = await Promise.all([supabase.rpc('resumen_fiscal'), supabase.from('norm_umbrales_alerta').select('tipo,umbral,nivel')]);
-      if (a.error) setErr(a.error.message); else setR(a.data as Resumen);
+      if (a.error) setErr(a.error.message); else {
+        setR(a.data as Resumen);
+        const i = await supabase.rpc('iibb_santafe_categoria', { p_facturacion: (a.data as Resumen).facturado_12m });
+        const f = (i.data as { categoria: number; tope_ingresos_anuales: number; impuesto_mensual: number; excede_regimen: boolean }[] | null)?.[0];
+        if (f) setIibb({ categoria: f.categoria, tope_ingresos_anuales: Number(f.tope_ingresos_anuales), impuesto_mensual: Number(f.impuesto_mensual), excede_regimen: f.excede_regimen });
+      }
       const d7 = new Date(); d7.setDate(d7.getDate() - 7);
       const p = await supabase.rpc('facturacion_pendiente', { p_desde: d7.toLocaleDateString('en-CA'), p_hasta: new Date().toLocaleDateString('en-CA') });
       setPend(((p.data ?? []) as { falta_electronico: number }[]).reduce((t, x) => t + Number(x.falta_electronico), 0));
@@ -34,6 +40,15 @@ export default function Inicio() {
       {pend > 0 && <div className="card aviso"><div className="sem"><span className="dot" />Tenés {ars(pend)} cobrados con medios electrónicos sin facturar (últimos 7 días). <Link to="/facturar">Ver qué facturar →</Link></div></div>}
       <h2>Qué hacer hoy</h2>
       <div className="card"><ul>{queHacerHoy(r, ind).map((t, i) => <li key={i}>{t}</li>)}</ul></div>
+      {iibb && (!comercio?.provincia || /santa\s*fe/i.test(comercio.provincia)) && (
+        <div className={`card ${iibb.excede_regimen ? 'urgente' : 'ok'}`}>
+          <div className="sem"><span className="dot" />Ingresos Brutos de Santa Fe (Régimen Simplificado)</div>
+          {iibb.excede_regimen
+            ? <div>Tu facturación de 12 meses supera el máximo del Régimen Simplificado ({ars(iibb.tope_ingresos_anuales)}). Revisá con API Santa Fe en qué régimen te corresponde estar.</div>
+            : <div>Por tu facturación de 12 meses te corresponde la categoría {iibb.categoria}: {ars(iibb.impuesto_mensual)} por mes <span className="mut">(hasta {ars(iibb.tope_ingresos_anuales)} al año)</span></div>}
+          <div className="mut">Se paga todos los meses, con vencimiento según la terminación de tu CUIT, y se recategoriza en enero y julio. Si ya estás adherido, confirmá tu categoría en API Santa Fe.</div>
+        </div>
+      )}
       <h2>Indicadores</h2>
       {ind.map(i => (
         <div key={i.clave} className={`card ${i.nivel}`}>
