@@ -170,7 +170,7 @@ export default function Vender() {
 
         {err && <p className="err">{err}</p>}{msg && <p className="msg">{msg}</p>}
         <button disabled={ocupado || !puede} onClick={cobrar} style={{ width: '100%' }}>Cobrar</button>
-        <p className="mut">Las ventas en efectivo se anotan igual; así el sistema te dice cuánto conviene facturar.</p>
+        <p className="mut">Anotá todas las ventas, también las de efectivo: así el sistema te muestra cuánto te falta facturar.</p>
       </div>
     </>
   );
