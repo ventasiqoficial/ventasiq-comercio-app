@@ -64,7 +64,7 @@ export function peorNivel(i: Indicador[]): Nivel {
 export function queHacerHoy(r: Resumen, ind: Indicador[]): string[] {
   const t: string[] = [];
   if (!r.categoria_actual) t.push('Cargá tu categoría de monotributo en Configuración.');
-  if (r.excluido_por_parametros) t.push('Algún parámetro (ingresos, superficie, energía o alquiler) supera el máximo del régimen. Consultá con un contador.');
+  if (r.excluido_por_parametros) t.push('Algún parámetro (ingresos, superficie, energía o alquiler) supera el máximo del régimen. Revisá los valores vigentes en ARCA y decidí cómo seguir.');
   if (r.cobros_sin_clasificar_cantidad > 0)
     t.push(`Tenés ${r.cobros_sin_clasificar_cantidad} cobros/pagos electrónicos sin clasificar (${ars(r.cobros_sin_clasificar_importe)}).`);
   if (r.categoria_actual && r.categoria_correspondiente && r.categoria_correspondiente > r.categoria_actual)
