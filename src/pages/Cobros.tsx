@@ -33,7 +33,7 @@ export default function Cobros() {
   return (
     <>
       <h1>Cobros y pagos electrónicos</h1>
-      <p className="mut">Anotá lo que cobrás o pagás por Mercado Pago, transferencia, QR o tarjeta. El efectivo no hace falta.</p>
+      <p className="mut">Anotá lo que cobrás o pagás por Mercado Pago, transferencia, QR o tarjeta, para ordenarlo con lo que ven los bancos y billeteras. Las ventas en efectivo las anotás en “Vender”.</p>
       <form className="card" onSubmit={guardar}>
         <div className="row">
           <div><label>Fecha</label><input type="date" value={f.fecha} onChange={set('fecha')} required /></div>
