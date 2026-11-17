@@ -103,14 +103,14 @@ export default function Caja() {
         <h2>Caja cerrada</h2>
         <p>Esperado {ars(cierre.efectivo_esperado)} · contado {ars(cierre.efectivo_contado ?? 0)} → <Dif d={Number(cierre.diferencia ?? 0)} /></p>
         <p className="mut">Vendiste {ars(cierre.ventas_total)} en {cierre.cantidad_ventas} ventas: {Object.entries(cierre.por_medio).map(([k, v]) => `${ETIQUETAS[k] ?? k} ${ars(Number(v))}`).join(' · ') || '—'}</p>
-        {Object.entries(cierre.por_medio).some(([k]) => !['efectivo', 'cuenta_corriente'].includes(k)) && <p><Link to="/facturar">Ver qué facturar →</Link></p>}
+        {cierre.ventas_total > 0 && <p><Link to="/facturar">Ver qué facturar →</Link></p>}
       </div>}
 
       <div className="card">
         <label>Ventas del día</label><input type="date" value={dia} onChange={e => setDia(e.target.value)} />
         <h2>Vendido: {ars(total)}</h2>
         {porMedio.map(([t, v]) => <div key={t} className="mut">{t}: {ars(v)}</div>)}
-        {rol === 'dueno' && elec > 0 && <p>Cobrado con medios electrónicos: <b>{ars(elec)}</b>. <Link to="/facturar">Ver qué facturar →</Link></p>}
+        {rol === 'dueno' && total > 0 && <p>{elec > 0 && <>Cobrado con medios electrónicos: <b>{ars(elec)}</b>. </>}<Link to="/facturar">Ver qué facturar →</Link></p>}
       </div>
       <div className="card"><table><tbody>
         {lista.map(v => <tr key={v.id}><td>{new Date(v.creado_en).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</td><td>{ETIQUETAS[v.medio] ?? v.medio}</td>
