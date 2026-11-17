@@ -23,7 +23,7 @@ export default function Inicio() {
       }
       const d7 = new Date(); d7.setDate(d7.getDate() - 7);
       const p = await supabase.rpc('facturacion_pendiente', { p_desde: d7.toLocaleDateString('en-CA'), p_hasta: new Date().toLocaleDateString('en-CA') });
-      setPend(((p.data ?? []) as { falta_electronico: number }[]).reduce((t, x) => t + Number(x.falta_electronico), 0));
+      setPend(((p.data ?? []) as { falta_total: number }[]).reduce((t, x) => t + Number(x.falta_total), 0));
       setU(((b.data ?? []) as Umbral[]).map(x => ({ ...x, umbral: Number(x.umbral) })));
     })();
   }, []);
@@ -37,7 +37,7 @@ export default function Inicio() {
     <>
       <h1>{comercio?.nombre}</h1>
       <div className={`card sem ${peor}`}><span className="dot" />Mi monotributo: {txt}{r.categoria_actual && <span className="mut"> · Categoría {r.categoria_actual}</span>}</div>
-      {pend > 0 && <div className="card aviso"><div className="sem"><span className="dot" />Tenés {ars(pend)} cobrados con medios electrónicos sin facturar (últimos 7 días). <Link to="/facturar">Ver qué facturar →</Link></div></div>}
+      {pend > 0 && <div className="card aviso"><div className="sem"><span className="dot" />Tenés {ars(pend)} de ventas sin facturar (últimos 7 días). <Link to="/facturar">Ver qué facturar →</Link></div></div>}
       <h2>Qué hacer hoy</h2>
       <div className="card"><ul>{queHacerHoy(r, ind).map((t, i) => <li key={i}>{t}</li>)}</ul></div>
       {iibb && (!comercio?.provincia || /santa\s*fe/i.test(comercio.provincia)) && (
@@ -58,7 +58,7 @@ export default function Inicio() {
           <div className="mut">{i.mensaje}</div>
         </div>
       ))}
-      <p className="mut">Los topes se leen de la normativa cargada en el sistema. Son una guía: ante dudas, consultá con un contador.</p>
+      <p className="mut">Los topes se leen de la normativa cargada en el sistema. Son una guía: confirmá siempre los valores vigentes en ARCA. Las decisiones son tuyas.</p>
     </>
   );
 }
