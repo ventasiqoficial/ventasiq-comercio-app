@@ -25,14 +25,16 @@ export default function Compras() {
   };
   useEffect(() => { cargar(); }, []);
 
-  function aplicarQR(texto: string) {
-    setErr(''); setInfo(''); setCamara(false);
+  function aplicarQR(texto: string): boolean {
+    setErr(''); setInfo('');
     const r = leerQR(texto);
-    if (typeof r === 'string') { setErr(r); return; }
+    if (typeof r === 'string') { setErr(r); return false; }
+    setCamara(false);
     setF(prev => ({ ...prev, fecha: r.fecha, cuit: r.cuit, tipo: String(r.tipoCmp).padStart(3, '0'), pv: String(r.ptoVta), numero: String(r.nroCmp),
       neto: '', iva: '', perc: '', total: String(r.totalPesos), nc: r.esNotaCredito }));
     setInfo('Leímos la factura. Revisá los datos y apretá "Guardar compra". Si querés, completá neto, IVA y percepciones.' +
       (r.moneda !== 'PES' ? ` Está en ${r.moneda}: la pasamos a pesos con la cotización del comprobante.` : ''));
+    return true;
   }
   async function deArchivo(file?: File) {
     if (!file) return; setErr(''); setInfo('Buscando el QR…');
@@ -58,13 +60,13 @@ export default function Compras() {
       <p className="mut">Cargá las facturas de tus proveedores. Podés importarlas todas juntas desde “Facturación”.</p>
       <div className="card">
         <h2 style={{ marginTop: 0 }}>Cargar con el QR de la factura</h2>
-        <p className="mut">Las facturas electrónicas traen un código QR. Leerlo completa los datos solo.</p>
+        <p className="mut">Las facturas y tickets electrónicos traen un código QR de ARCA. Leerlo completa los datos solo.</p>
         <button type="button" onClick={() => setCamara(true)}>Escanear con la cámara</button>{' '}
         <label className="btn sec" style={{ display: 'inline-block', color: 'var(--ink)', background: '#fff', border: '1.5px solid var(--ink)', cursor: 'pointer', margin: '.8rem 0 0' }}>
           Subir foto o PDF<input type="file" accept="image/*,application/pdf" style={{ display: 'none' }} onChange={e => { deArchivo(e.target.files?.[0]); e.target.value = ''; }} />
         </label>
         <label>…o pegá el link del QR</label>
-        <input value={link} onChange={e => setLink(e.target.value)} onPaste={e => { const t = e.clipboardData.getData('text'); if (t) { e.preventDefault(); setLink(''); aplicarQR(t); } }} placeholder="https://www.afip.gob.ar/fe/qr/?p=…" />
+        <input value={link} onChange={e => setLink(e.target.value)} onPaste={e => { const t = e.clipboardData.getData('text'); if (t) { e.preventDefault(); setLink(''); aplicarQR(t); } }} placeholder="https://www.arca.gob.ar/fe/qr/?p=…" />
         {link && <button type="button" className="sec" onClick={() => { aplicarQR(link); setLink(''); }}>Leer link</button>}
         {info && <p className="msg">{info}</p>}
       </div>
