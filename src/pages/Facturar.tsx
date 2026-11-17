@@ -22,9 +22,9 @@ export default function Facturar() {
   useEffect(() => { cargar(); }, []);
 
   const d = dias.find(x => x.fecha === sel);
-  useEffect(() => { if (d) setF(p => ({ ...p, importe: d.falta_electronico > 0 ? String(d.falta_electronico) : '' })); }, [sel, dias.length]);
-  const atrasados = dias.filter(x => x.fecha !== hoy() && x.falta_electronico > 0);
-  const totalAtrasado = atrasados.reduce((s, x) => s + x.falta_electronico, 0);
+  useEffect(() => { if (d) setF(p => ({ ...p, importe: d.falta_total > 0 ? String(d.falta_total) : '' })); }, [sel, dias.length]);
+  const atrasados = dias.filter(x => x.fecha !== hoy() && x.falta_total > 0);
+  const totalAtrasado = atrasados.reduce((s, x) => s + x.falta_total, 0);
 
   async function registrar(e: FormEvent) {
     e.preventDefault(); setErr(''); setMsg('');
@@ -37,7 +37,7 @@ export default function Facturar() {
   return (
     <>
       <h1>Qué facturar</h1>
-      <p className="mut">Tomamos las ventas que anotás en “Gestión del comercio” y te decimos cuánto conviene facturar. Lo cobrado por medios electrónicos es lo que más conviene tener facturado, porque queda registrado en bancos y billeteras.</p>
+      <p className="mut">Tomamos las ventas que anotás en “Gestión del comercio” y te mostramos cuánto te falta facturar de cada día. Todas las ventas se facturan, también las de efectivo. Lo cobrado por medios electrónicos queda registrado en bancos y billeteras, y ARCA lo puede ver.</p>
       <div className="card">
         <label>Día</label>
         <input type="date" value={sel} max={hoy()} min={haceDias(30)} onChange={e => setSel(e.target.value)} />
@@ -48,10 +48,11 @@ export default function Facturar() {
             <div><div className="mut">En efectivo</div><b>{ars(d.efectivo)}</b></div>
             <div><div className="mut">Ya facturado</div><b>{ars(d.facturado)}</b></div>
           </div>
-          {d.falta_electronico > 0
-            ? <h2>Te conviene facturar {ars(d.falta_electronico)}</h2>
-            : <h2>{d.electronico > 0 ? '✔ Lo cobrado electrónicamente ya está facturado' : 'No hay cobros electrónicos este día'}</h2>}
-          {d.falta_total > d.falta_electronico && <p className="mut">Si querés facturar también el efectivo, el total del día sería {ars(d.falta_total)}.</p>}
+          {d.falta_total > 0
+            ? <h2>Te falta facturar {ars(d.falta_total)}</h2>
+            : <h2>{d.total > 0 ? '✔ Todo lo vendido este día ya está facturado' : 'No hay ventas anotadas este día'}</h2>}
+          {d.falta_total > 0 && d.falta_electronico > 0 && <p className="mut">De ese monto, {ars(d.falta_electronico)} se cobró con medios electrónicos.</p>}
+          <p className="mut">Podés hacer una factura por cada venta o una sola por todo el día. Vos decidís cómo; lo importante es que no quede nada sin facturar.</p>
         </> : <p className="mut">Cargando…</p>}
       </div>
       <div className="card">
@@ -72,11 +73,11 @@ export default function Facturar() {
           {err && <p className="err">{err}</p>}{msg && <p className="msg">{msg}</p>}
           <button>Registrar factura emitida</button>
         </form>
-        <p className="mut">Aviso: ARCA fija límites para facturar a consumidor final sin identificarlo y reglas para la factura global del día. Confirmalo con tu contador.</p>
+        <p className="mut">Aviso: ARCA fija límites para facturar a consumidor final sin identificarlo y reglas para la factura global del día. Confirmá los valores vigentes en el sitio de ARCA antes de emitir.</p>
       </div>
       {atrasados.length > 0 && <div className="card">
         <h2 style={{ marginTop: 0 }}>Días anteriores con pendiente: {ars(totalAtrasado)}</h2>
-        <table><tbody>{atrasados.map(x => <tr key={x.fecha}><td>{x.fecha}</td><td className="n">{ars(x.falta_electronico)}</td><td><a href="#" onClick={e => { e.preventDefault(); setSel(x.fecha); window.scrollTo(0, 0); }}>facturar</a></td></tr>)}</tbody></table>
+        <table><tbody>{atrasados.map(x => <tr key={x.fecha}><td>{x.fecha}</td><td className="n">{ars(x.falta_total)}</td><td><a href="#" onClick={e => { e.preventDefault(); setSel(x.fecha); window.scrollTo(0, 0); }}>facturar</a></td></tr>)}</tbody></table>
       </div>}
     </>
   );
