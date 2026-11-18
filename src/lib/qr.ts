@@ -23,7 +23,13 @@ export function leerQR(texto: string): DatosQR | string {
   try { j = JSON.parse(decodeBase64(decodeURIComponent(m[1]))); } catch { return 'No se pudo leer el contenido del QR.'; }
   const cuit = String(j.cuit ?? '').replace(/\D/g, '');
   const fecha = String(j.fecha ?? '');
-  const importe = Number(j.importe), ctz = Number(j.ctz ?? 1) || 1;
+  // El importe suele venir como número, pero si viene como texto con puntos de miles o coma decimal ("12.345,67") también se entiende.
+  const aNumero = (v: unknown): number => {
+    if (typeof v === 'number') return v;
+    const s = String(v ?? '').trim();
+    return /,\d{1,2}$/.test(s) ? Number(s.replace(/\./g, '').replace(',', '.')) : Number(s);
+  };
+  const importe = aNumero(j.importe), ctz = aNumero(j.ctz ?? 1) || 1;
   const tipo = Number(j.tipoCmp), pv = Number(j.ptoVta), nro = Number(j.nroCmp);
   if (cuit.length !== 11 || !/^\d{4}-\d{2}-\d{2}/.test(fecha) || !isFinite(importe) || !isFinite(tipo) || !isFinite(nro))
     return 'El QR no tiene todos los datos de la factura.';
