@@ -32,7 +32,7 @@ export default function Compras() {
     setCamara(false);
     setF(prev => ({ ...prev, fecha: r.fecha, cuit: r.cuit, tipo: String(r.tipoCmp).padStart(3, '0'), pv: String(r.ptoVta), numero: String(r.nroCmp),
       neto: '', iva: '', perc: '', total: String(r.totalPesos), nc: r.esNotaCredito }));
-    setInfo('Leímos la factura. Revisá los datos y apretá "Guardar compra". Si querés, completá neto, IVA y percepciones.' +
+    setInfo(`Leímos la factura por ${ars(r.totalPesos)}. Revisá los datos y apretá "Guardar compra".` + ' Si querés, completá neto, IVA y percepciones.' +
       (r.moneda !== 'PES' ? ` Está en ${r.moneda}: la pasamos a pesos con la cotización del comprobante.` : ''));
     return true;
   }
@@ -82,10 +82,13 @@ export default function Compras() {
           <div><label>Punto de venta</label><input type="number" value={f.pv} onChange={set('pv')} />
             <small className="mut">Primer número de la factura (en 00003-00000125 es el 3).</small></div>
           <div><label>Número de factura</label><input type="number" value={f.numero} onChange={set('numero')} required /></div>
-          <div><label>Neto</label><input type="number" step="0.01" value={f.neto} onChange={set('neto')} /></div>
-          <div><label>IVA</label><input type="number" step="0.01" value={f.iva} onChange={set('iva')} /></div>
+          <div><label>Neto</label><input type="number" step="0.01" value={f.neto} onChange={set('neto')} />
+            {Number(f.neto) > 0 && <small className="mut">{ars(Number(f.neto))}</small>}</div>
+          <div><label>IVA</label><input type="number" step="0.01" value={f.iva} onChange={set('iva')} />
+            {Number(f.iva) > 0 && <small className="mut">{ars(Number(f.iva))}</small>}</div>
           <div><label>Percepciones</label><input type="number" step="0.01" value={f.perc} onChange={set('perc')} /></div>
-          <div><label>Total (si lo dejás vacío se suma)</label><input type="number" step="0.01" value={f.total} onChange={set('total')} /></div>
+          <div><label>Total (si lo dejás vacío se suma)</label><input type="number" step="0.01" value={f.total} onChange={set('total')} />
+            {Number(f.total) > 0 && <small className="mut">Total: <b>{ars(Number(f.total))}</b></small>}</div>
         </div>
         <label><input type="checkbox" style={{ width: 'auto' }} checked={f.nc} onChange={e => setF({ ...f, nc: e.target.checked })} /> Es nota de crédito</label>
         {err && <p className="err">{err}</p>}<button>Guardar compra</button>
