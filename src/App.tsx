@@ -17,6 +17,7 @@ import Contactos from './pages/Contactos';
 import MiPlan from './pages/MiPlan';
 import Reportes from './pages/Reportes';
 import AvisoConexion from './components/AvisoConexion';
+import AvisoPrueba from './components/AvisoPrueba';
 import { estadoPlan } from './lib/plan';
 
 const CONTABLE = ['/contable', '/facturar', '/cobros', '/facturacion', '/config', '/plan'];
@@ -32,7 +33,8 @@ export default function App() {
   const dueno = rol === 'dueno';
   const contable = CONTABLE.includes(pathname) && dueno;
   // Prueba vencida o suscripción cancelada: solo se puede ver Mi plan (los datos se conservan).
-  const bloqueado = !estadoPlan(comercio.estado_suscripcion, comercio.prueba_hasta).vigente;
+  const planEstado = estadoPlan(comercio.estado_suscripcion, comercio.prueba_hasta);
+  const bloqueado = !planEstado.vigente;
   const L = ({ to, t }: { to: string; t: string }) => <NavLink to={to} className={({ isActive }) => (isActive ? 'active' : '')}>{t}</NavLink>;
   return (
     <>
@@ -42,6 +44,7 @@ export default function App() {
       </div></header>
       <main>
         <AvisoConexion />
+        {dueno && !bloqueado && <AvisoPrueba plan={planEstado} hasta={comercio.prueba_hasta} />}
         {!dueno && bloqueado ? <div className="card"><h1>Suscripción vencida</h1><p>La suscripción de {comercio.nombre} está vencida. Avisale al dueño para que la renueve; tus datos se conservan.</p></div> :
         <Routes>
           {dueno && <Route path="/plan" element={<MiPlan />} />}
