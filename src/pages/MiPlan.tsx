@@ -5,18 +5,22 @@ import { estadoPlan, leerPrecio, type Precio } from '../lib/plan';
 import { ars } from '../lib/semaforo';
 
 export default function MiPlan() {
-  const { comercio, recargar } = useAuth();
+  const { comercio, recargar, session } = useAuth();
   const [precio, setPrecio] = useState<Precio | null | undefined>(undefined);
   const [msg, setMsg] = useState('');
   const [ocupado, setOcupado] = useState(false);
+  const [email, setEmail] = useState(session?.user?.email ?? '');
   const p = estadoPlan(comercio!.estado_suscripcion, comercio!.prueba_hasta);
 
   useEffect(() => { leerPrecio().then(setPrecio); }, []);
   useEffect(() => { if (new URLSearchParams(window.location.search).get('mp')) recargar(); }, []);
 
   async function suscribirme() {
-    setMsg(''); setOcupado(true);
-    const { data, error } = await supabase.functions.invoke('crear-suscripcion');
+    setMsg('');
+    const mail = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { setMsg('Escribí un email válido para el cobro y la factura.'); return; }
+    setOcupado(true);
+    const { data, error } = await supabase.functions.invoke('crear-suscripcion', { body: { email: mail } });
     setOcupado(false);
     if (error || !data?.init_point) { setMsg('No pudimos iniciar la suscripción. Probá de nuevo en unos minutos.'); return; }
     window.location.href = data.init_point;
@@ -34,6 +38,13 @@ export default function MiPlan() {
         {p.estado === 'en_prueba' && <p className="msg">Estás en prueba gratuita: te quedan {p.diasRestantes} {p.diasRestantes === 1 ? 'día' : 'días'}. Si te suscribís ahora, el primer cobro se hace recién cuando termina la prueba.</p>}
         {p.estado === 'prueba_vencida' && <p className="err">Tu prueba gratuita terminó. Suscribite para seguir usando el sistema; tus datos quedan guardados.</p>}
         {p.estado === 'cancelada' && <p className="err">Tu suscripción está cancelada. Podés volver a suscribirte cuando quieras; tus datos quedan guardados.</p>}
+        {p.estado !== 'activa' && (
+          <div style={{ margin: '12px 0' }}>
+            <label htmlFor="emailCobro">Email para el cobro y la factura</label>
+            <input id="emailCobro" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tuemail@ejemplo.com" />
+            <p className="mut" style={{ fontSize: '0.85rem', margin: '4px 0 0' }}>Si ese email tiene cuenta de Mercado Pago, vas a entrar con ella. Si no tiene, podés pagar igual como invitado con tu tarjeta.</p>
+          </div>
+        )}
         {p.estado !== 'activa' && <button onClick={suscribirme} disabled={ocupado || !precio}>{ocupado ? 'Abriendo Mercado Pago…' : 'Suscribirme con Mercado Pago'}</button>}
         {msg && <p className="err">{msg}</p>}
       </div>
